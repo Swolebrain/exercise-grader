@@ -1,0 +1,22 @@
+li.logo:hover{
+    background-color:white !important;
+}
+li.logo{
+    height: 128px;
+    padding:0;
+}
+.side-nav a{
+    height:44px;
+    line-height: 44px;
+}
+#textarea-solution{
+    border:2px solid rgba(0,0,225,0.4);
+    margin-top:20px;
+}
+#textarea-container label{
+    top:1.5rem; left:1.2rem;
+}
+
+label.active{
+    color: rgba(0,0,225,0.6) !important;
+}

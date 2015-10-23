@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Learn Coding with FVI</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <ul id="nav-mobile" class="side-nav fixed" style="width: 15%;">
+            <li class="logo">
+                <a id="logo-container" href="http://www.fvi.edu/" class="brand-logo">
+                    <img src="img/fvi-logo-only.png" alt="FVI you my boy blue" class="responsive-img">
+                </a>
+            </li>
+        </ul>
+        <div class="container">
+            <h1 id="problem-title" class="center-align">Select a Problem</h1>
+            <div class="row">
+                <div id="problem-div" class="col s10 offset-s1 m5 offset-m1">
+                    <p></p>
+                    <div id="textarea-container" class="input-field col s12">
+                        <textarea id="textarea-solution" class="materialize-textarea"></textarea>
+                        <label for="textarea-solution">Solution</label>
+                    </div>
+                </div>
+                <div id="tests-div" class="col s10 m5">
+                
+                </div>
+            </div>
+        </div>
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
+        <script>
+            var urlRoot = "http://www.swolebrain.com:4004"
+            $(document).ready(function(){
+                retrieveMenuItems();
+                $("#nav-mobile").on("click", "li", function(event){
+                    event.preventDefault();
+                    var self = $(this);
+                    $.ajax({
+                        url: urlRoot+"/exercise/"+self.data("url"),
+                        error: function(){
+                            alert("Failed to load exercise, click again");
+                        },
+                        success: function(resp){
+                            buildLayout(resp);
+                        }
+                    });
+                });
+            });
+            function retrieveMenuItems(){
+                $.ajax({
+                    url: "http://www.swolebrain.com:4004/exercises/all",
+                    error: function(){
+                        alert("Error connecting to the server. Try reload");
+                    },
+                    success: function(resp){
+                        populateMenu(resp);
+                        //I get an array of objects with shortName and url
+                    }
+                });
+            }
+            //param is an array of objects with shortName and url
+            //used to populate the navbar
+            function populateMenu(obj){
+                obj.forEach(function(elem){
+                    $("#nav-mobile").append(
+                        "<li class='bold' data-url='"+elem.url+"'>"+
+                            "<a href='#'>"+elem.shortName+"</a>"+
+                        "</li>"
+                    );    
+                });
+            }
+            //function which builds the problem layout
+            function buildLayout(obj){
+                $("#problem-title").html(obj.shortName);
+                $("#problem-div p").html(obj.text);
+            }
+        </script>
+    </body>
+</html>
