@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Learn Coding with FVI</title>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
         <link rel="stylesheet" href="css/style.css">
     </head>
@@ -16,21 +17,36 @@
         <div class="container">
             <h1 id="problem-title" class="center-align">Select a Problem</h1>
             <div class="row">
-                <div id="problem-div" class="col s10 offset-s1 m5 offset-m1">
+                <div id="problem-div" class="col s10 offset-s1 m5">
                     <p></p>
                     <div id="textarea-container" class="input-field col s12">
-                        <textarea id="textarea-solution" class="materialize-textarea"></textarea>
+                        <textarea id="textarea-solution" class="materialize-textarea" rows="10"></textarea>
                         <label for="textarea-solution">Solution</label>
                     </div>
+                    <div class="btn" id="evalSolution">Evaluate Solution<i class="material-icons right">send</i></div>
                 </div>
-                <div id="tests-div" class="col s10 m5">
-                
+                <div id="tests-div" class="col s10 offset-s1 m7">
+                    <table class="striped">
+                        <col style="width:40%">
+                        <col style="width:30%">
+                        <col style="width:30%">
+                        <thead>
+                            <tr>
+                                <th>Test</th>
+                                <th>Result</th>
+                                <th>Expected</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
         <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
         <script>
+            var viewModel;
             var urlRoot = "http://www.swolebrain.com:4004"
             $(document).ready(function(){
                 retrieveMenuItems();
@@ -47,6 +63,7 @@
                         }
                     });
                 });
+                $("#evalSolution").on("click", evalSolution);
             });
             function retrieveMenuItems(){
                 $.ajax({
@@ -73,8 +90,27 @@
             }
             //function which builds the problem layout
             function buildLayout(obj){
+                viewModel = obj;
+                //console.log(obj.functionHeader);
                 $("#problem-title").html(obj.shortName);
                 $("#problem-div p").html(obj.text);
+                $("#textarea-solution").val(obj.functionHeader)
+            }
+            
+            //function which evaluates the solution provided in
+            //the textarea
+            function evalSolution(){
+                $("#tests-div").find("tbody").html("");
+                console.log("getting here. Viewmodel is "+viewModel);
+                var solutionStr = $("#textarea-solution").val();
+                viewModel.testCases.forEach(function(elem, i){
+                    console.log("evalSolution evaluating "+elem);
+                    var result = eval(solutionStr+elem);
+                    $("#tests-div").find("tbody")
+                        .append("<tr><td>"+elem+"</td><td>"+result+"</td>"+
+                            "<td>"+viewModel.testResults[i]+"</td><tr>");
+                });
+                
             }
         </script>
     </body>
