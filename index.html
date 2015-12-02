@@ -47,7 +47,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
         <script>
             var viewModel;
-            var urlRoot = "http://www.swolebrain.com:4004"
+            var urlRoot = "http://www.swolebrain.com:4004";
             $(document).ready(function(){
                 retrieveMenuItems();
                 $("#nav-mobile").on("click", "li", function(event){
@@ -64,6 +64,7 @@
                     });
                 });
                 $("#evalSolution").on("click", evalSolution);
+                $("textarea").keypress(handleEnters);
             });
             function retrieveMenuItems(){
                 $.ajax({
@@ -111,6 +112,46 @@
                             "<td>"+viewModel.testResults[i]+"</td><tr>");
                 });
                 
+            }
+            
+            //function to handle enters
+            function handleEnters(evt){
+                //evt.preventDefault();
+                if (evt.keyCode === 13){
+                    evt.preventDefault();
+                    var txt = $("textarea");
+                    var cursorPos = txt[0].selectionStart;
+                    console.log(cursorPos);
+                    var linesStr = txt.val().substr(0, cursorPos);
+                    var lines = linesStr.split("\n");
+                    var lastLine = lines[lines.length-1];
+                    var spcCount = 0;
+                    for (var i =0; i < lastLine.length; i++){
+                        if (lastLine[i] != " ") break;
+                        else spcCount++;
+                    }
+                    //console.log("Spaces in '"+lastLine+"': "+spcCount);
+                    if (lastLine.charAt(lastLine.length-1) === "{"){
+                        //console.log("line ended in {");
+                        spcCount += 4;
+                    }
+                    var spaces = "";
+                    for(var i = 0; i < spcCount; i++){ 
+                        spaces += " ";                             
+                    }
+                    
+                    if (spaces.length > 0){
+                        var tail = txt[0].value.substr(cursorPos, txt[0].value.length);
+                        console.log("linesStr: "+linesStr);
+                        console.log("tail: "+tail);
+                        var finalVal = linesStr+"\n"+ spaces + tail;
+                        txt[0].value = finalVal;
+                        txt[0].selectionStart =cursorPos+spcCount+1;
+                        txt[0].selectionEnd =cursorPos+spcCount+1;
+                    }
+                    
+                    
+                }
             }
         </script>
     </body>
