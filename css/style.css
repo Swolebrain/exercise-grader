@@ -5,9 +5,11 @@ li.logo{
     height: 128px;
     padding:0;
 }
-.side-nav a{
+.side-nav li a{
     height:44px;
     line-height: 44px;
+    padding-left:0px !important;
+    padding-right:0px !important;
 }
 #textarea-solution{
     /*border:2px solid rgba(0,0,225,0.4);*/

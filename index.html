@@ -64,7 +64,8 @@
                     });
                 });
                 $("#evalSolution").on("click", evalSolution);
-                $("textarea").keypress(handleEnters);
+                $("textarea").keypress(handleKeys);
+                $("textarea").keydown(handleTabs);
             });
             function retrieveMenuItems(){
                 $.ajax({
@@ -114,44 +115,77 @@
                 
             }
             
-            //function to handle enters
-            function handleEnters(evt){
-                //evt.preventDefault();
+            //functions to handle tabs, enters, etc
+            
+            function handleKeys(evt){
                 if (evt.keyCode === 13){
-                    evt.preventDefault();
-                    var txt = $("textarea");
-                    var cursorPos = txt[0].selectionStart;
-                    console.log(cursorPos);
-                    var linesStr = txt.val().substr(0, cursorPos);
-                    var lines = linesStr.split("\n");
-                    var lastLine = lines[lines.length-1];
-                    var spcCount = 0;
-                    for (var i =0; i < lastLine.length; i++){
-                        if (lastLine[i] != " ") break;
-                        else spcCount++;
-                    }
-                    //console.log("Spaces in '"+lastLine+"': "+spcCount);
-                    if (lastLine.charAt(lastLine.length-1) === "{"){
-                        //console.log("line ended in {");
-                        spcCount += 4;
-                    }
-                    var spaces = "";
-                    for(var i = 0; i < spcCount; i++){ 
-                        spaces += " ";                             
-                    }
-                    
-                    if (spaces.length > 0){
-                        var tail = txt[0].value.substr(cursorPos, txt[0].value.length);
-                        console.log("linesStr: "+linesStr);
-                        console.log("tail: "+tail);
-                        var finalVal = linesStr+"\n"+ spaces + tail;
-                        txt[0].value = finalVal;
-                        txt[0].selectionStart =cursorPos+spcCount+1;
-                        txt[0].selectionEnd =cursorPos+spcCount+1;
-                    }
-                    
-                    
+                    handleEnters(evt);
                 }
+                else if (evt.keyCode === 125){ //tab
+                    handleCloseBraces();
+                }
+            }
+            
+            function handleTabs(e){
+                if (e.keyCode === 9){
+                    e.preventDefault();
+                    wedgeAtCursor("    ", $("textarea")[0]);
+                }
+            }
+            function handleCloseBraces(){
+                var txtArea = $("textarea")[0];
+                var cursorPos = txtArea.selectionStart;
+                var line = "";
+                for (var i = cursorPos-1; i > 0; i--){
+                    if ( txtArea.value[i] === "\n") break;
+                    else line = txtArea.value[i]+line;
+                }
+                
+                if (line.match(new RegExp(/^     *$/gi)) ){
+                    console.log("matched");
+                    //take off 4 leading spaces
+                    var head = txtArea.value.substring(0,cursorPos-line.length);
+                    var tail = line.substr(4)+txtArea.value.substr(cursorPos);
+                    txtArea.value = head+tail;
+                    txtArea.selectionStart = cursorPos - 4;
+                    txtArea.selectionEnd = cursorPos - 4;
+                }
+            }
+            function handleEnters(evt){
+                evt.preventDefault();
+                var txt = $("textarea");
+                var cursorPos = txt[0].selectionStart;
+                var linesStr = txt.val().substr(0, cursorPos);
+                var lines = linesStr.split("\n");
+                var lastLine = lines[lines.length-1];
+                var spcCount = 0;
+                for (var i =0; i < lastLine.length; i++){
+                    if (lastLine[i] != " " ) break;
+                    else spcCount++;
+
+                }
+                //console.log("Spaces in '"+lastLine+"': "+spcCount);
+                if (lastLine.charAt(lastLine.length-1) === "{"){
+                    //console.log("line ended in {");
+                    spcCount += 4;
+                }
+                var spaces = "";
+                for(var i = 0; i < spcCount; i++){ 
+                    spaces += " ";                             
+                }
+
+                if (spaces.length >= 0){
+                    wedgeAtCursor("\n"+spaces, txt[0]);
+                }
+
+            }
+            function wedgeAtCursor(str, txt){
+                var cursorPos = txt.selectionStart;
+                var tail = txt.value.substr(cursorPos, txt.value.length);
+                var finalVal = txt.value.substr(0,cursorPos)+str+ tail;
+                txt.value = finalVal;
+                txt.selectionStart =cursorPos+str.length;
+                txt.selectionEnd =cursorPos+str.length;
             }
         </script>
     </body>
