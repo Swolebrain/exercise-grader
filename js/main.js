@@ -7,87 +7,46 @@ var populateMenu = menuLoader[1];
 var handleKeys = require("./includes/handleKeys.js");
 var handleTabs = require("./includes/handleTabs.js");
 
-$(document).ready(function(){
+$(document).ready(function () {
   retrieveMenuItems(urlRoot, populateMenu);
-  $("#nav-mobile").on("click", "li", function(event){
+  $("#nav-mobile").on("click", "li", function (event) {
     event.preventDefault();
     var self = $(this);
     $.ajax({
-      url: urlRoot+"/exercise/"+self.data("url"),
-      error: function(){
+      url: urlRoot + "/exercise/" + self.data("url"),
+      error: function () {
         alert("Failed to load exercise, click again");
       },
-      success: function(resp){
-        buildLayout(resp);
+      success: function (resp) {
+        buildLayout(resp, viewModel);
       }
     });
   });
-  $("#evalSolution").on("click", evalSolution);
+  $("#evalSolution").on("click", function(){
+    evalSolution(viewModel);
+  });
   $("textarea").keypress(handleKeys);
   $("textarea").keydown(handleTabs);
 });
 
 
 //function which builds the problem layout
-function buildLayout(obj){
-      viewModel = obj;
-      //console.log(obj.functionHeader);
-      if (viewModel.hasOwnProperty("executionContext")){
-        for (var k in viewModel.executionContext){
-          var v = eval(viewModel.executionContext[k]);
-          viewModel.executionContext[k] = v;
-          viewModel.text = viewModel.text.replace("{{"+k+"}}", v);
-          viewModel.testResults[0] = 
-            viewModel.testResults[0].replace("{{"+k+"}}", v);
-        }
-      }
-      $("#problem-title").html(obj.shortName);
-      $("#problem-div p").html(obj.text);
-      $("#textarea-solution").val(obj.functionHeader);
+function buildLayout(obj, viewModel) {
+  viewModel = obj;
+  //console.log(obj.functionHeader);
+  if (viewModel.hasOwnProperty("executionContext")) {
+    for (var k in viewModel.executionContext) {
+      var v = eval(viewModel.executionContext[k]);
+      viewModel.executionContext[k] = v;
+      viewModel.text = viewModel.text.replace("{{" + k + "}}", v);
+      viewModel.testResults[0] =
+        viewModel.testResults[0].replace("{{" + k + "}}", v);
+    }
+  }
+  $("#problem-title").html(obj.shortName);
+  $("#problem-div p").html(obj.text);
+  $("#textarea-solution").val(obj.functionHeader);
 }
 
 //function which evaluates the solution provided in
 //the textarea
-function evalSolution(){
-  $("#tests-div").find("tbody").html("");
-  var solutionStr = $("#textarea-solution").val();
-  if (viewModel.hasOwnProperty("testCases")){
-    viewModel.testCases.forEach(function(elem, i){
-      try{
-        var result = eval(solutionStr+elem);
-      }
-      catch(e){
-        result = e;
-      }
-      $("#tests-div").find("tbody")
-        .append("<tr><td>"+elem+"</td><td>"+result+"</td>"+
-            "<td>"+viewModel.testResults[i]+"</td><tr>");
-    });
-  }
-  else{
-    //evaluate code without test cases
-    console.log("answer: "+viewModel.testResults[0]);
-    var good = evalConsole(solutionStr) == evalConsole(viewModel.testResults[0]);
-    var good = good? "correct" : "incorrect"
-      $("#tests-div").find("tbody")
-      .append("<tr><td>run</td><td>"+good+"</td>"+
-          "<td>"+good+"</td><tr>");   
-
-  }
-    function evalConsole(str){
-      var stdout = "";
-      var console = { 
-        log: function(str){stdout += str+"\n";}
-      };
-      try{
-        eval(str);
-      }
-      catch(e){
-        return e;
-      }
-      return stdout;
-    }
-
-}
-
-
