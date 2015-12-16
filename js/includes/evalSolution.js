@@ -1,4 +1,4 @@
-module.exports = evalsolution;
+module.exports = evalSolution;
 
 function evalSolution(viewModel) {
   $("#tests-div").find("tbody").html("");

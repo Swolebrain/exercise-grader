@@ -16,6 +16,7 @@ li.logo{
     margin-top:20px;
     height:50%;
     font-family: "Courier New", Courier, monospace;
+    resize: none; !important;
 }
 #textarea-container label{
     top:1.5rem; left:1.2rem;
