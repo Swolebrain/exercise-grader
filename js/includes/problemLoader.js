@@ -20,8 +20,14 @@ module.exports = function (event, dis, urlRoot) {
           var v = eval(vm.executionContext[k]);
           vm.executionContext[k] = v;
           vm.text = vm.text.replace("{{" + k + "}}", v);
-          vm.testResults[0] =
-            vm.testResults[0].replace("{{" + k + "}}", v);
+          for (var i = 0; i < vm.testResults.length; i++){
+            vm.testResults[i] =
+              vm.testResults[i].replace("{{" + k + "}}", v);
+            if (vm.hasOwnProperty("testCases")){
+              vm.testCases[i] =
+                vm.testCases[i].replace("{{" + k + "}}", v);
+            }
+          }
         }
       }
       $("#problem-title").html(obj.shortName);

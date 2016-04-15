@@ -7,7 +7,7 @@ function evalSolution(viewModel) {
   if (viewModel.hasOwnProperty("testCases")) {
     viewModel.testCases.forEach(function (elem, i) {
       try {
-        var result = eval(solutionStr + elem);
+        var result = eval( elem + solutionStr);
       } catch (e) {
         result = e;
       }
@@ -18,15 +18,25 @@ function evalSolution(viewModel) {
   } else {
     //evaluate code without test cases
     console.log("answer: " + viewModel.testResults[0]);
-    var good = evalConsole(solutionStr) == evalConsole(viewModel.testResults[0]);
-    var good = good ? "correct" : "incorrect"
-    $("#tests-div").find("tbody")
-      .append("<tr><td>run</td><td>" + good + "</td>" +
-        "<td>" + good + "</td><tr>");
+    var studentRes = evalConsole(solutionStr, viewModel.executionContext);
+    console.log(studentRes);
+    for (var i in viewModel.testResults){
+      var good = studentRes == evalConsole(viewModel.testResults[i], viewModel.executionContext);
+      good = good ? "correct" : "Your output:<br>"+studentRes;
+      $("#tests-div").find("tbody")
+        .append("<tr><td>run</td><td>" + good + "</td>" +
+          "<td>" + good + "</td><tr>");
 
+    }
+      
   }
+  gradeSolution();
 
-  function evalConsole(str) {
+  function evalConsole(str, ctx) {
+    if (ctx){
+      for (var i in ctx)
+        eval(""+i+"="+ctx[i]);
+    }
     var stdout = "";
     var console = {
       log: function (str) {
@@ -39,6 +49,32 @@ function evalSolution(viewModel) {
       return e;
     }
     return stdout.length>0? stdout : result;
+  }
+  
+  function gradeSolution(){
+    //here is where we compare expected to actual for each TD and put red
+    //or green in each
+    var arr = $("#tests-div tbody").find("td");
+    var g = "rgba(0,150,0,.5)";
+    var r = "rgba(250,0,0,.5)";
+    var correct = true;
+    for (var i =0; i < arr.length; i+=3){
+      if (arr[i+1].innerHTML === arr[i+2].innerHTML){
+        $(arr[i]).css("background-color", g);
+        $(arr[i+1]).css("background-color", g);
+        $(arr[i+2]).css("background-color", g);
+      }
+      else{
+        correct = false;
+        console.log("Error in solution: ");
+        console.log("|"+arr[i+1].innerHTML+"| vs |"+arr[i+2].innerHTML +"|");
+        $(arr[i]).css("background-color", r);
+        $(arr[i+1]).css("background-color", r);
+        $(arr[i+2]).css("background-color", r);
+      }
+    }
+    //here i need to talk to the server and let it know that
+    //if the answer was correct this guy should get some points or something
   }
 
 }
@@ -165,8 +201,14 @@ module.exports = function (event, dis, urlRoot) {
           var v = eval(vm.executionContext[k]);
           vm.executionContext[k] = v;
           vm.text = vm.text.replace("{{" + k + "}}", v);
-          vm.testResults[0] =
-            vm.testResults[0].replace("{{" + k + "}}", v);
+          for (var i = 0; i < vm.testResults.length; i++){
+            vm.testResults[i] =
+              vm.testResults[i].replace("{{" + k + "}}", v);
+            if (vm.hasOwnProperty("testCases")){
+              vm.testCases[i] =
+                vm.testCases[i].replace("{{" + k + "}}", v);
+            }
+          }
         }
       }
       $("#problem-title").html(obj.shortName);
@@ -185,9 +227,10 @@ function wedgeAtCursor(str, txt){
   txt.selectionStart =cursorPos+str.length;
   txt.selectionEnd =cursorPos+str.length;
 }
+
 },{}],7:[function(require,module,exports){
 //var viewModel;
-var urlRoot = "http://www.swolebrain.com:4004";
+var urlRoot = "http://www.fvi-grad.com:4004";
 
 var retrieveMenuItems = require('./includes/menu-loader.js');
 var handleKeys = require("./includes/handleKeys.js");
@@ -195,17 +238,20 @@ var handleTabs = require("./includes/handleTabs.js");
 var evalSolution = require("./includes/evalSolution.js");
 var problemLoader = require("./includes/problemLoader.js");
 
+//just attaching event listeners and so on
 $(document).ready(function () {
+  //$("textarea").unbind();
   retrieveMenuItems(urlRoot);
   $("#nav-mobile").on("click", "li", function(event){
-    problemLoader(event, $(this), urlRoot);
+    if (!$(this).hasClass(".logo")){
+      problemLoader(event, $(this), urlRoot);
+    }
   });
   $("#evalSolution").on("click", function(){
     evalSolution(window.viewModel);
   });
   $("textarea").keypress(handleKeys);
   $("textarea").keydown(handleTabs);
-  $("textarea").unbind('autoresize');
 });
 
 
