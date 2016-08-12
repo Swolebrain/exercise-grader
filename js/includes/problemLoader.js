@@ -33,6 +33,6 @@ module.exports = function (event, dis, urlRoot) {
       $("#problem-title").html(obj.shortName);
       $("#problem-div p").html(obj.text);
       $("#textarea-solution").val(obj.functionHeader);
-      $("tbody").find("tr").remove();
+      $("table.striped tbody tr").remove();
     }
   };

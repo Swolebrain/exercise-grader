@@ -191,7 +191,7 @@ module.exports = function (event, dis, urlRoot) {
         buildLayout(resp);
       }
     });
-  
+
     //function which builds the problem layout
     function buildLayout(obj) {
       window.viewModel = obj;
@@ -214,8 +214,10 @@ module.exports = function (event, dis, urlRoot) {
       $("#problem-title").html(obj.shortName);
       $("#problem-div p").html(obj.text);
       $("#textarea-solution").val(obj.functionHeader);
+      $("table.striped tbody tr").remove();
     }
   };
+
 },{}],6:[function(require,module,exports){
 module.exports = wedgeAtCursor;
 

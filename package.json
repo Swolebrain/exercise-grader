@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "live" : "budo js/main.js:js/prod.js --live"
+    "live" : "budo js/main.js:js/prod.js --live",
+    "bundle": "browserify js/main.js -o js/prod.js"
   },
   "repository": {
     "type": "git",
