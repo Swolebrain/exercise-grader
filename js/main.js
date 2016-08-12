@@ -1,5 +1,4 @@
 var urlRoot = "http://www.fvi-grad.com:4004";
-var $ = require('./includes/jquery.min.js');
 
 var retrieveMenuItems = require('./includes/menu-loader.js');
 var handleKeys = require("./includes/handleKeys.js");
